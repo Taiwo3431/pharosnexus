@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pharos Nexus — JoyRaphael</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06070d;
+      --surface: #0b0d17;
+      --surface2: #0f1220;
+      --border: rgba(255,107,28,0.18);
+      --border-bright: rgba(255,107,28,0.5);
+      --orange: #ff6b1c;
+      --orange-dim: #c44c0f;
+      --amber: #ffbe3d;
+      --green: #22ffa0;
+      --text: #dde3f0;
+      --muted: #5e6680;
+      --glow-o: rgba(255,107,28,0.25);
+      --glow-g: rgba(34,255,160,0.2);
+      --radius: 18px;
+      --radius-sm: 10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── GRID CANVAS BACKGROUND ─────────────────────── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── NOISE OVERLAY ──────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.5;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────── */
+    .shell {
+      position: relative;
+      z-index: 2;
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 28px 28px 60px;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+      padding: 14px 22px;
+      background: rgba(11,13,23,0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: conic-gradient(from 180deg, var(--orange), var(--amber), var(--orange));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 0 20px var(--glow-o);
+      animation: spin-slow 8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin-slow {
+      to { transform: rotate(360deg); }
+    }
+
+    .brand-text { color: #fff; }
+    .brand-text span { color: var(--orange); }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: rgba(255,255,255,0.02);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .pill.live {
+      border-color: rgba(34,255,160,0.3);
+      color: var(--green);
+      background: rgba(34,255,160,0.05);
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      margin-right: 6px;
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── HERO ───────────────────────────────────────── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      gap: 20px;
+      margin-bottom: 20px;
+      align-items: stretch;
+    }
+
+    .hero-headline {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 44px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+    }
+
+    .hero-headline::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: -60px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(255,107,28,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--orange);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow::before {
+      content: '▶ ';
+    }
+
+    h1 {
+      font-size: clamp(46px, 5.5vw, 82px);
+      font-weight: 800;
+      line-height: 0.9;
+      letter-spacing: -0.05em;
+      color: #fff;
+      max-width: 640px;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--orange);
+      display: block;
+    }
+
+    .hero-copy {
+      margin-top: 24px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--muted);
+      max-width: 520px;
+    }
+
+    .hero-strip {
+      display: flex;
+      gap: 10px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tag-badge {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(255,107,28,0.08);
+      border: 1px solid rgba(255,107,28,0.2);
+      color: var(--orange);
+    }
+
+    /* ── REACTOR CARD ───────────────────────────────── */
+    .reactor-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reactor-card::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -80px;
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(255,107,28,0.07) 0%, transparent 70%);
+    }
+
+    .reactor-ring {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .reactor-ring svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+    }
+
+    .ring-track { fill: none; stroke: rgba(255,107,28,0.08); stroke-width: 2; }
+    .ring-fill {
+      fill: none;
+      stroke: var(--orange);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 565;
+      stroke-dashoffset: 565;
+      filter: drop-shadow(0 0 8px rgba(255,107,28,0.6));
+      transform: rotate(-90deg);
+      transform-origin: center;
+      transition: stroke-dashoffset 1.5s ease;
+    }
+
+    .ring-outer {
+      fill: none;
+      stroke: rgba(255,107,28,0.15);
+      stroke-width: 1;
+      stroke-dasharray: 4 8;
+      animation: spin-slow 20s linear infinite;
+      transform-origin: center;
+    }
+
+    .reactor-inner {
+      text-align: center;
+      z-index: 1;
+    }
+
+    .reactor-label {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .reactor-value {
+      font-size: 28px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+      text-shadow: 0 0 20px var(--glow-o);
+      transition: all 0.6s ease;
+    }
+
+    .reactor-sub {
+      font-size: 11px;
+      color: var(--orange);
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 4px;
+    }
+
+    .reactor-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin-top: 24px;
+    }
+
+    .rmeta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .rmeta-label { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .rmeta-val { font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text); }
+    .rmeta-val.green { color: var(--green); }
+    .rmeta-val.orange { color: var(--orange); }
+
+    /* ── STAT GRID ──────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      cursor: default;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-bright);
+      box-shadow: 0 0 30px rgba(255,107,28,0.08);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--orange), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .stat-card:hover::before { opacity: 1; }
+
+    .stat-label {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+      line-height: 1;
+      transition: color 0.4s;
+    }
+
+    .stat-value.loading { color: var(--muted); font-size: 20px; }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .stat-spark {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 28px;
+      margin-top: 12px;
+    }
+
+    .spark-bar {
+      flex: 1;
+      background: var(--orange);
+      border-radius: 2px 2px 0 0;
+      min-height: 3px;
+      opacity: 0.5;
+      transition: height 0.4s ease;
+    }
+
+    .spark-bar:last-child { opacity: 1; }
+
+    /* ── MIDDLE ROW ─────────────────────────────────── */
+    .mid-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* ── INSPECTOR CARD ─────────────────────────────── */
+    .inspector-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .card-heading {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--orange);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-heading::before {
+      content: '';
+      display: block;
+      width: 3px; height: 14px;
+      background: var(--orange);
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--orange);
+    }
+
+    .search-wrap {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--orange);
+    }
+
+    .search-input::placeholder { color: #3a3f55; }
+
+    .search-btn {
+      background: var(--orange);
+      color: #000;
+      border: none;
+      padding: 13px 22px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+
+    .search-btn:hover { background: var(--amber); transform: translateY(-1px); }
+    .search-btn:active { transform: translateY(0); }
+
+    .detect-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 4px 10px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,107,28,0.3);
+      color: var(--orange);
+      background: rgba(255,107,28,0.05);
+      margin-bottom: 16px;
+      transition: all 0.3s;
+    }
+
+    .result-grid {
+      display: none;
+      gap: 10px;
+      flex-direction: column;
+      margin-top: 16px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .result-key { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .result-val { font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--green); }
+
+    /* ── TERMINAL ───────────────────────────────────── */
+    .terminal-card {
+      background: #070910;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .term-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .term-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    .term-body {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.8;
+      color: #4a5068;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 240px;
+    }
+
+    .term-line { color: #4a5068; }
+    .term-line.ok { color: var(--green); }
+    .term-line.info { color: var(--orange); }
+    .term-line.dim { color: #2a2e42; }
+    .term-line.err { color: #ff5050; }
+
+    /* ── BOTTOM ROW ─────────────────────────────────── */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .primitive-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      transition: border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .primitive-card:hover { border-color: var(--border-bright); }
+
+    .primitive-card.dark-feature {
+      background: #0a0b14;
+      border-color: rgba(255,107,28,0.25);
+    }
+
+    .prim-icon {
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+
+    .prim-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .prim-desc {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .prim-badge {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      color: var(--orange);
+    }
+
+    /* ── LINKS SECTION ──────────────────────────────── */
+    .links-card {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .link-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .ext-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.05);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .ext-link:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: rgba(255,107,28,0.05);
+    }
+
+    .ext-link .arrow { opacity: 0.4; transition: opacity 0.2s, transform 0.2s; }
+    .ext-link:hover .arrow { opacity: 1; transform: translate(2px, -2px); }
+
+    /* ── FOOTER / SIGNATURE ─────────────────────────── */
+    .footer {
+      text-align: center;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer strong { color: var(--orange); }
+    .footer .sig { margin-top: 6px; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+
+    /* ── ANIMATIONS ─────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .shell > * {
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .shell > *:nth-child(1) { animation-delay: 0.0s; }
+    .shell > *:nth-child(2) { animation-delay: 0.1s; }
+    .shell > *:nth-child(3) { animation-delay: 0.15s; }
+    .shell > *:nth-child(4) { animation-delay: 0.2s; }
+    .shell > *:nth-child(5) { animation-delay: 0.25s; }
+    .shell > *:nth-child(6) { animation-delay: 0.3s; }
+
+    @keyframes counter-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .updated { animation: counter-up 0.4s ease; }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .hero { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .mid-row { grid-template-columns: 1fr; }
+      .bottom-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .shell { padding: 16px 16px 50px; }
+      .stat-grid { grid-template-columns: 1fr; }
+      .bottom-row { grid-template-columns: 1fr; }
+      h1 { font-size: 44px; }
+      .hero-headline { padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-text">PHAROS<span> NEXUS</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="pill">Chain ID · 0xce68</div>
+      <div class="pill">CCTP Domain 31</div>
+      <div class="pill">50K TPS Engine</div>
+      <div class="pill live"><span class="live-dot"></span>Mainnet Live</div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-headline">
+      <div>
+        <div class="eyebrow">Pharos Network · L1 Blockchain</div>
+        <h1>Real-Time<br><em>Chain Intel</em></h1>
+        <p class="hero-copy">
+          A live network surface for the Pharos ecosystem. Blocks, gas, staking yields, cross-chain primitives — all pulsing from the mainnet RPC with no wallet prompts, no friction.
+        </p>
+      </div>
+      <div class="hero-strip">
+        <span class="tag-badge">x402 Rails</span>
+        <span class="tag-badge">Circle CCTP</span>
+        <span class="tag-badge">Chainlink CCIP</span>
+        <span class="tag-badge">SPN Compute</span>
+        <span class="tag-badge">RWA Settlement</span>
+        <span class="tag-badge">Agent Commerce</span>
+      </div>
+    </div>
+
+    <div class="reactor-card">
+      <div class="reactor-ring">
+        <svg viewBox="0 0 220 220">
+          <circle class="ring-outer" cx="110" cy="110" r="103"/>
+          <circle class="ring-track" cx="110" cy="110" r="90"/>
+          <circle class="ring-fill" id="ringFill" cx="110" cy="110" r="90"/>
+        </svg>
+        <div class="reactor-inner">
+          <div class="reactor-label">Current Block</div>
+          <div class="reactor-value" id="reactorBlock">———</div>
+          <div class="reactor-sub" id="reactorLat">Pinging...</div>
+        </div>
+      </div>
+
+      <div class="reactor-meta">
+        <div class="rmeta-row">
+          <span class="rmeta-label">Network Status</span>
+          <span class="rmeta-val green" id="netStatus">Connecting...</span>
+        </div>
+        <div class="rmeta-row">
+          <span class="rmeta-label">Gas Price</span>
+          <span class="rmeta-val orange" id="gasPrice">— gwei</span>
+        </div>
+        <div class="rmeta-row">
+          <span class="rmeta-label">Testnet Block</span>
+          <span class="rmeta-val" id="testnetBlock">—</span>
+        </div>
+        <div class="rmeta-row">
+          <span class="rmeta-label">Staking APY</span>
+          <span class="rmeta-val green">5.0%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT ROW -->
+  <section class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Mainnet Height</div>
+      <div class="stat-value loading" id="s-block">...</div>
+      <div class="stat-sub">Blocks confirmed on-chain</div>
+      <div class="stat-spark" id="spark-block"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">RPC Latency</div>
+      <div class="stat-value loading" id="s-lat">...</div>
+      <div class="stat-sub">Global mainnet response time</div>
+      <div class="stat-spark" id="spark-lat"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Institutional Funding</div>
+      <div class="stat-value">$52M</div>
+      <div class="stat-sub">Series A · Top-tier VC backing</div>
+      <div class="stat-spark" id="spark-fund"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Max Throughput</div>
+      <div class="stat-value">50K</div>
+      <div class="stat-sub">Target TPS · EVM-compatible L1</div>
+      <div class="stat-spark" id="spark-tps"></div>
+    </div>
+  </section>
+
+  <!-- MID ROW -->
+  <section class="mid-row">
+
+    <!-- INSPECTOR -->
+    <div class="inspector-card">
+      <div class="card-heading">Address Inspector</div>
+      <div class="search-wrap">
+        <input class="search-input" id="addrInput" type="text" placeholder="Paste 0x address or tx hash..." />
+        <button class="search-btn" onclick="runInspect()">Inspect</button>
+      </div>
+      <div class="detect-badge" id="detectBadge">Auto-detect active · Mainnet RPC</div>
+      <div class="result-grid" id="resultGrid">
+        <div class="result-row">
+          <span class="result-key">PROS Balance</span>
+          <span class="result-val" id="rBal">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-key">Nonce / Tx Count</span>
+          <span class="result-val" id="rNonce">—</span>
+        </div>
+        <div class="result-row">
+          <span class="result-key">Detected Type</span>
+          <span class="result-val" id="rType">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="terminal-card">
+      <div class="term-head">
+        <div class="term-dot" style="background:#ff5f57"></div>
+        <div class="term-dot" style="background:#febc2e"></div>
+        <div class="term-dot" style="background:#28c840"></div>
+        <span style="font-family:'JetBrains Mono';font-size:11px;color:#2a2e42;margin-left:8px">pharos-nexus-terminal</span>
+      </div>
+      <div class="term-body" id="termBody">
+        <div class="term-line dim">[boot] Initialising Pharos Nexus...</div>
+        <div class="term-line dim">[sys]  Built by JoyRaphael</div>
+        <div class="term-line dim">[net]  Connecting to RPC...</div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- PRIMITIVES ROW -->
+  <section class="bottom-row">
+    <div class="primitive-card">
+      <div class="prim-icon">⚡</div>
+      <div class="prim-title">x402 Payment Rails</div>
+      <div class="prim-desc">Micropayment infrastructure for pay-per-use APIs, agent-native commerce flows, and machine-to-machine settlement built natively into the L1.</div>
+      <div class="prim-badge">Agent Commerce</div>
+    </div>
+    <div class="primitive-card">
+      <div class="prim-icon">🔁</div>
+      <div class="prim-title">Circle CCTP · Domain 31</div>
+      <div class="prim-desc">Native USDC transfer rails with burn-and-mint mechanics for seamless cross-chain settlement across the Pacific corridor and beyond.</div>
+      <div class="prim-badge">USDC Native</div>
+    </div>
+    <div class="primitive-card">
+      <div class="prim-icon">🔗</div>
+      <div class="prim-title">Chainlink CCIP Bridge</div>
+      <div class="prim-desc">Canonical cross-chain interoperability protocol with RWA flow verification and oracle price feeds powering DeFi execution surfaces.</div>
+      <div class="prim-badge">Bridge Online</div>
+    </div>
+    <div class="primitive-card dark-feature">
+      <div class="prim-icon">🌐</div>
+      <div class="prim-title">SPN Compute Layer</div>
+      <div class="prim-desc">Specialized Processing Nodes extending L1 compute for custom workloads — RWAs, market-aware automations, trading, and oracle-tied execution.</div>
+      <div class="prim-badge">L1-Extension</div>
+    </div>
+    <div class="primitive-card dark-feature">
+      <div class="prim-icon">🏦</div>
+      <div class="prim-title">RealFi Settlement</div>
+      <div class="prim-desc">On-chain RWA infrastructure mapping real-world assets to programmable settlement rails — a builder-native path to institutional-grade finance.</div>
+      <div class="prim-badge">RWA Rails</div>
+    </div>
+    <div class="primitive-card dark-feature">
+      <div class="prim-icon">📡</div>
+      <div class="prim-title">Oracle Mesh</div>
+      <div class="prim-desc">Market-accurate data feeds flowing directly into DeFi, RWA protocols, and automated execution engines. No trust assumptions. Just verified on-chain data.</div>
+      <div class="prim-badge">Verified Data</div>
+    </div>
+  </section>
+
+  <!-- LINKS -->
+  <section class="bottom-row" style="grid-template-columns: 1fr;">
+    <div class="links-card">
+      <div class="card-heading">Ecosystem Quick Access</div>
+      <div class="link-list">
+        <a class="ext-link" href="https://pharos.xyz" target="_blank">Main Site <span class="arrow">↗</span></a>
+        <a class="ext-link" href="https://pharos.xyz/devhub" target="_blank">DevHub <span class="arrow">↗</span></a>
+        <a class="ext-link" href="https://docs.pharos.xyz" target="_blank">Docs <span class="arrow">↗</span></a>
+        <a class="ext-link" href="https://testnet.pharosnetwork.xyz/" target="_blank">Testnet <span class="arrow">↗</span></a>
+        <a class="ext-link" href="https://www.pharosscan.xyz" target="_blank">Mainnet Explorer <span class="arrow">↗</span></a>
+        <a class="ext-link" href="https://atlantic.pharosscan.xyz/" target="_blank">Testnet Explorer <span class="arrow">↗</span></a>
+        <a class="ext-link" href="https://pharos.socialscan.io/" target="_blank">SocialScan <span class="arrow">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>Built for the <strong>Pharos Ecosystem</strong> · Pharos Nexus Dashboard</div>
+    <div class="sig">Designed &amp; coded by <strong>JoyRaphael</strong> · 2026 · rpc.pharos.xyz</div>
+  </footer>
+
+</div>
+
+<script>
+  /* ── GRID CANVAS ────────────────────────────────────────── */
+  (function() {
+    const c = document.getElementById('bg-canvas');
+    const ctx = c.getContext('2d');
+    let W, H;
+
+    function resize() {
+      W = c.width = window.innerWidth;
+      H = c.height = window.innerHeight;
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    const COLS = 24, ROWS = 14;
+    let dots = [];
+
+    function buildDots() {
+      dots = [];
+      for (let r = 0; r <= ROWS; r++) {
+        for (let col = 0; col <= COLS; col++) {
+          dots.push({
+            x: (col / COLS) * W,
+            y: (r / ROWS) * H,
+            o: Math.random() * 0.3 + 0.05,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+    }
+
+    buildDots();
+
+    let t = 0;
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      t += 0.008;
+
+      const gx = (W / COLS), gy = (H / ROWS);
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(255,107,28,0.04)';
+      ctx.lineWidth = 0.5;
+
+      for (let col = 0; col <= COLS; col++) {
+        const x = (col / COLS) * W;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, H);
+        ctx.stroke();
+      }
+
+      for (let r = 0; r <= ROWS; r++) {
+        const y = (r / ROWS) * H;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
+      }
+
+      // Dots at intersections
+      dots.forEach(d => {
+        const pulse = Math.sin(t + d.phase) * 0.5 + 0.5;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,107,28,${d.o * pulse})`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+    window.addEventListener('resize', () => { resize(); buildDots(); });
+  })();
+
+  /* ── RPC HELPERS ────────────────────────────────────────── */
+  const MAINNET = 'https://rpc.pharos.xyz';
+  const TESTNET = 'https://atlantic.dplabs-internal.com';
+
+  async function rpc(url, method, params = []) {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', method, params, id: 1 })
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    return d.result;
+  }
+
+  /* ── SPARKLINE ──────────────────────────────────────────── */
+  const sparkData = { block: [], lat: [], fund: [], tps: [] };
+  for (let k in sparkData) sparkData[k] = Array(12).fill(0);
+
+  function renderSpark(id, data, max) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    data.forEach(v => {
+      const bar = document.createElement('div');
+      bar.className = 'spark-bar';
+      const pct = max > 0 ? Math.min((v / max) * 100, 100) : 10;
+      bar.style.height = Math.max(pct, 8) + '%';
+      el.appendChild(bar);
+    });
+  }
+
+  function pushSpark(key, val) {
+    sparkData[key].push(val);
+    sparkData[key].shift();
+  }
+
+  /* ── TERMINAL ───────────────────────────────────────────── */
+  const term = document.getElementById('termBody');
+
+  function log(msg, cls = '') {
+    const d = document.createElement('div');
+    d.className = 'term-line ' + cls;
+    d.textContent = msg;
+    term.appendChild(d);
+    term.scrollTop = term.scrollHeight;
+    if (term.children.length > 80) term.removeChild(term.firstChild);
+  }
+
+  /* ── RING FILL ──────────────────────────────────────────── */
+  function setRing(pct) {
+    const circ = 2 * Math.PI * 90;
+    const offset = circ - (pct / 100) * circ;
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+  }
+
+  /* ── MAIN PULSE ─────────────────────────────────────────── */
+  let lastBlock = 0;
+
+  async function pulse() {
+    const t0 = Date.now();
+    try {
+      const [blockHex, gasHex] = await Promise.all([
+        rpc(MAINNET, 'eth_blockNumber'),
+        rpc(MAINNET, 'eth_gasPrice')
+      ]);
+
+      const block = parseInt(blockHex, 16);
+      const lat = Date.now() - t0;
+      const gasgwei = (parseInt(gasHex, 16) / 1e9).toFixed(3);
+
+      // Reactor
+      const el = document.getElementById('reactorBlock');
+      el.classList.remove('updated');
+      void el.offsetWidth;
+      el.classList.add('updated');
+      el.textContent = block.toLocaleString();
+      document.getElementById('reactorLat').textContent = lat + 'ms latency';
+      document.getElementById('netStatus').textContent = '● Healthy';
+      document.getElementById('gasPrice').textContent = gasgwei + ' gwei';
+
+      // Stats
+      setText('s-block', block.toLocaleString(), false);
+      setText('s-lat', lat + 'ms', false);
+
+      // Sparklines
+      pushSpark('block', block % 1000);
+      pushSpark('lat', lat);
+      pushSpark('fund', 52);
+      pushSpark('tps', 50);
+      renderSpark('spark-block', sparkData.block, 1000);
+      renderSpark('spark-lat', sparkData.lat, 600);
+      renderSpark('spark-fund', sparkData.fund, 60);
+      renderSpark('spark-tps', sparkData.tps, 60);
+
+      // Ring (relative to block mod)
+      setRing((block % 100));
+
+      log(`[sync] Block #${block.toLocaleString()} · ${lat}ms · gas ${gasgwei} gwei`, 'ok');
+
+      // Testnet
+      try {
+        const tbHex = await rpc(TESTNET, 'eth_blockNumber');
+        const tb = parseInt(tbHex, 16);
+        document.getElementById('testnetBlock').textContent = tb.toLocaleString();
+        log(`[testnet] Atlantic block #${tb.toLocaleString()}`, 'dim');
+      } catch (_) {
+        document.getElementById('testnetBlock').textContent = 'offline';
+      }
+
+    } catch (e) {
+      log('[err] ' + e.message, 'err');
+      document.getElementById('netStatus').textContent = '● Degraded';
+    }
+  }
+
+  function setText(id, val, loading = true) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    el.classList.toggle('loading', loading);
+  }
+
+  /* ── INSPECTOR ──────────────────────────────────────────── */
+  document.getElementById('addrInput').addEventListener('input', function() {
+    const v = this.value.trim();
+    const b = document.getElementById('detectBadge');
+    if (v.startsWith('0x') && v.length === 42) b.textContent = 'TYPE: EVM Address detected';
+    else if (v.startsWith('0x') && v.length > 42) b.textContent = 'TYPE: TX Hash detected';
+    else if (!isNaN(v) && v !== '') b.textContent = `CONV: ${(parseFloat(v)/1e18).toFixed(6)} PROS (wei)`;
+    else b.textContent = 'Auto-detect active · Mainnet RPC';
+  });
+
+  async function runInspect() {
+    const v = document.getElementById('addrInput').value.trim();
+    if (v.length < 42) { log('[warn] Invalid address length', 'err'); return; }
+
+    log(`[inspect] Querying ${v.slice(0, 10)}...`, 'info');
+
+    const grid = document.getElementById('resultGrid');
+    grid.style.display = 'flex';
+
+    try {
+      const [balHex, nonceHex] = await Promise.all([
+        rpc(MAINNET, 'eth_getBalance', [v, 'latest']),
+        rpc(MAINNET, 'eth_getTransactionCount', [v, 'latest'])
+      ]);
+
+      const pros = (parseInt(balHex, 16) / 1e18).toFixed(4);
+      const nonce = parseInt(nonceHex, 16);
+      const type = v.length === 42 ? 'EOA / Contract Address' : 'TX Hash';
+
+      document.getElementById('rBal').textContent = pros + ' PROS';
+      document.getElementById('rNonce').textContent = nonce;
+      document.getElementById('rType').textContent = type;
+
+      log(`[ok] Balance: ${pros} PROS · Nonce: ${nonce}`, 'ok');
+    } catch (e) {
+      log('[err] ' + e.message, 'err');
+    }
+  }
+
+  /* ── STATIC SPARKS ──────────────────────────────────────── */
+  function seedStaticSpark(id, vals, max) {
+    vals.forEach(v => { pushSpark(id, v); });
+    renderSpark('spark-' + id, sparkData[id], max);
+  }
+
+  seedStaticSpark('fund', [50,52,52,52,52,52,52,52,52,52,52,52], 60);
+  seedStaticSpark('tps', [45,47,48,50,50,50,50,50,50,50,50,50], 60);
+
+  /* ── BOOT ───────────────────────────────────────────────── */
+  log('[boot] Pharos Nexus v1.0 · JoyRaphael', 'info');
+  log('[sys]  Mainnet RPC: rpc.pharos.xyz', 'dim');
+  log('[sys]  Testnet RPC: atlantic.dplabs-internal.com', 'dim');
+  log('[net]  Establishing connection...', 'dim');
+
+  setRing(0);
+  pulse();
+  setInterval(pulse, 8000);
+</script>
+</body>
+</html>
